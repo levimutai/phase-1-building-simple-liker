@@ -1,20 +1,9 @@
-// Defining text characters for the empty and full hearts for you to use later.
-const EMPTY_HEART = '♡'
-const FULL_HEART = '♥'
-
-// Your JavaScript code goes here!
-
-
-
-
-//------------------------------------------------------------------------------
-// Don't change the code below: this function mocks the server response
-//------------------------------------------------------------------------------
-
+// Provided function to mock server call
 function mimicServerCall(url="http://mimicServer.example.com", config={}) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {
-      let isRandomFailure = Math.random() < .2
+      // Randomly reject or resolve
+      let isRandomFailure = Math.random() < 0.2;
       if (isRandomFailure) {
         reject("Random server error. Try again.");
       } else {
@@ -23,3 +12,35 @@ function mimicServerCall(url="http://mimicServer.example.com", config={}) {
     }, 300);
   });
 }
+
+// Wait for DOM to load
+document.addEventListener("DOMContentLoaded", () => {
+  // Select all the like glyphs (hearts)
+  const likeHearts = document.querySelectorAll(".like-glyph");
+  const modal = document.getElementById("modal");
+  const modalMessage = document.getElementById("modal-message");
+
+  likeHearts.forEach(heart => {
+    heart.addEventListener("click", () => {
+      // Only act if the heart is empty
+      if (heart.textContent === "♡") {
+        mimicServerCall()
+          .then(() => {
+            heart.textContent = "♥";
+            heart.classList.add("activated-heart");
+          })
+          .catch((error) => {
+            modal.classList.remove("hidden");
+            modalMessage.textContent = error;
+            setTimeout(() => {
+              modal.classList.add("hidden");
+            }, 3000);
+          });
+      } else {
+        // If heart is full, toggle back to empty
+        heart.textContent = "♡";
+        heart.classList.remove("activated-heart");
+      }
+    });
+  });
+});
